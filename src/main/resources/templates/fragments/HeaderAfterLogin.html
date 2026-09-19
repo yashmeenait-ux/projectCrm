@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div th:fragment="crm-user-header">
+
+  <style>
+    :root{
+      --lf-primary:#2563EB; --lf-primary-dark:#1D4ED8;
+      --lf-success:#10B981; --lf-warning:#F59E0B;
+      --lf-dark:#1E293B;    --lf-bg:#F8FAFC;
+      --lf-muted:#64748B;   --lf-border:#E2E8F0;
+    }
+    .lf-nav-wrap{position:sticky;top:0;z-index:1050;font-family:'Plus Jakarta Sans',system-ui,sans-serif;}
+    .lf-navbar{
+      background:rgba(255,255,255,.85);
+      backdrop-filter:saturate(180%) blur(18px);
+      -webkit-backdrop-filter:saturate(180%) blur(18px);
+      border-bottom:1px solid var(--lf-border);
+      box-shadow:0 4px 20px -10px rgba(15,23,42,.12);
+      padding:.55rem 0;
+    }
+    .lf-brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;line-height:1;}
+    .lf-brand-logo{
+      width:42px;height:42px;border-radius:12px;
+      background:linear-gradient(135deg,var(--lf-primary),var(--lf-primary-dark));
+      color:#fff;display:flex;align-items:center;justify-content:center;
+      font-size:1.25rem;box-shadow:0 8px 20px -6px rgba(37,99,235,.55);
+    }
+    .lf-brand-text{font-weight:800;font-size:1.25rem;color:var(--lf-dark);letter-spacing:-.02em;}
+    .lf-brand-text .accent{
+      background:linear-gradient(135deg,var(--lf-primary),var(--lf-primary-dark));
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+    }
+    .lf-brand-tag{font-size:.68rem;color:var(--lf-muted);font-weight:500;margin-top:2px;}
+
+    /* Search Bar */
+    .lf-search{position:relative;max-width:340px;width:100%;}
+    .lf-search input{
+      background:var(--lf-bg);border:1px solid transparent;border-radius:12px;
+      padding:.6rem 1rem .6rem 2.4rem;font-size:.88rem;width:100%;
+      transition:all .25s ease;
+    }
+    .lf-search input:focus{
+      outline:none;background:#fff;border-color:var(--lf-primary);
+      box-shadow:0 0 0 4px rgba(37,99,235,.12);
+    }
+    .lf-search i{position:absolute;left Tram:.85rem;top:50%;transform:translateY(-50%);color:var(--lf-muted);}
+
+    /* Top-level Nav Links */
+    .lf-nav .nav-link{
+      color:var(--lf-dark)!important;font-weight:600;font-size:.92rem;
+      padding:.55rem .9rem!important;border-radius:10px;
+      display:flex;align-items:center;gap:.4rem;
+      transition:all .2s ease;position:relative;
+    }
+    .lf-nav .nav-link:hover{background:rgba(37,99,235,.08);color:var(--lf-primary)!important;}
+    .lf-nav .nav-link i{font-size:1rem;}
+    .lf-nav .dropdown-toggle::after{display:none;}
+    .lf-nav .dropdown-toggle .bi-chevron-down{font-size:.7rem;opacity:.6;transition:transform .2s;}
+    .lf-nav .show > .dropdown-toggle .bi-chevron-down{transform:rotate(180deg);}
+
+    /* Mega/Dropdown Panels */
+    .lf-mega{
+      border:1px solid var(--lf-border)!important;border-radius:16px!important;
+      box-shadow:0 20px 50px -15px rgba(15,23,42,.25)!important;
+      padding:.85rem!important;margin-top:.5rem!important;min-width:280px;
+      background:rgba(255,255,255,.96);backdrop-filter:blur(16px);
+      animation:lfFade .18s ease-out;
+    }
+    @keyframes lfFade{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:none;}}
+    .lf-mega .lf-mega-title{
+      font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
+      color:var(--lf-muted);font-weight:700;padding:.4rem .6rem .5rem;
+    }
+    .lf-mega .lf-item{
+      display:flex;align-items:center;gap:.75rem;padding:.6rem .65rem;
+      border-radius:10px;text-decoration:none;color:var(--lf-dark);
+      font-weight:600;font-size:.88rem;transition:all .2s ease;
+    }
+    .lf-mega .lf-item:hover{background:var(--lf-bg);color:var(--lf-primary);transform:translateX(2px);}
+    .lf-mega .lf-icon{
+      width:34px;height:34px;border-radius:9px;display:flex;
+      align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;
+    }
+    .lf-mega .lf-item small{display:block;font-weight:500;color:var(--lf-muted);font-size:.72rem;}
+    .ic-blue{background:rgba(37,99,235,.12);color:var(--lf-primary);}
+    .ic-green{background:rgba(16,185,129,.12);color:var(--lf-success);}
+    .ic-amber{background:rgba(245,158,11,.12);color:var(--lf-warning);}
+    .ic-rose{background:rgba(244,63,94,.12);color:#F43F5E;}
+    .ic-violet{background:rgba(139,92,246,.12);color:#8B5CF6;}
+
+    /* Quick Action Buttons */
+    .lf-quick{
+      border-radius:10px;font-weight:600;font-size:.82rem;
+      padding:.5rem .85rem;display:inline-flex;align-items:center;gap:.35rem;
+      text-decoration:none;transition:all .2s ease;
+    }
+    .lf-quick-outline{border:1.5px solid var(--lf-border);color:var(--lf-dark);background:#fff;}
+    .lf-quick-outline:hover{border-color:var(--lf-primary);color:var(--lf-primary);}
+    .lf-quick-solid{
+      background:linear-gradient(135deg,var(--lf-primary),var(--lf-primary-dark));
+      color:#fff;box-shadow:0 6px 16px -6px rgba(37,99,235,.55);
+    }
+    .lf-quick-solid:hover{color:#fff;transform:translateY(-1px);box-shadow:0 10px 20px -6px rgba(37,99,235,.65);}
+
+    /* Progress Chip */
+    .lf-progress-chip{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(37,99,235,.10));
+      border:1px solid rgba(16,185,129,.25);
+      padding:.4rem .75rem;border-radius:999px;font-size:.78rem;font-weight:700;color:var(--lf-dark);
+    }
+    .lf-progress-chip .dot{width:8px;height:8px;border-radius:50%;background:var(--lf-success);box-shadow:0 0 0 4px rgba(16,185,129,.18);}
+
+    /* Notification Badge */
+    .lf-icon-btn{
+      position:relative;width:40px;height:40px;border-radius:11px;
+      background:var(--lf-bg);border:1px solid var(--lf-border);
+      display:flex;align-items:center;justify-content:center;color:var(--lf-dark);
+      transition:all .2s ease;
+    }
+    .lf-icon-btn:hover{background:#fff;color:var(--lf-primary);border-color:var(--lf-primary);}
+    .lf-badge{
+      position:absolute;top:-4px;right:-4px;background:#EF4444;color:#fff;
+      font-size:.62rem;font-weight:700;min-width:18px;height:18px;
+      border-radius:9px;display:flex;align-items:center;justify-content:center;
+      border:2px solid #fff;
+    }
+
+    /* Profile Pill */
+    .lf-profile{
+      display:flex;align-items:center;gap:.6rem;padding:.3rem .55rem .3rem .3rem;
+      border-radius:999px;background:var(--lf-bg);border:1px solid var(--lf-border);
+      cursor:pointer;transition:all .2s ease;
+    }
+    .lf-profile:hover{background:#fff;border-color:var(--lf-primary);}
+    .lf-avatar{
+      width:34px;height:34px;border-radius:50%;
+      background:linear-gradient(135deg,var(--lf-primary),#8B5CF6);
+      color:#fff;font-weight:700;font-size:.85rem;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .lf-profile-name{font-weight:600;font-size:.85rem;color:var(--lf-dark);max-width:120px;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+    /* Notifications Dropdown Layout */
+    .lf-notif{min-width:340px;}
+    .lf-notif .lf-notif-item{
+      display:flex;gap:.7rem;padding:.7rem .65rem;border-radius:10px;
+      transition:background .2s;cursor:pointer;
+    }
+    .lf-notif .lf-notif-item:hover{background:var(--lf-bg);}
+    .lf-notif .lf-notif-item small{color:var(--lf-muted);font-size:.72rem;}
+    .lf-notif .title{font-weight:600;font-size:.85rem;color:var(--lf-dark);}
+
+    /* Mobile Responsive Logic */
+    @media (max-width: 991.98px){
+      .lf-search{max-width:100%;margin:.6rem 0;}
+      .lf-nav .nav-link{padding:.7rem .8rem!important;}
+      .lf-mega{box-shadow:none!important;border:none!important;padding:.25rem .5rem!important;}
+      .lf-profile-name{max-width:none;}
+      .lf-quick{width:100%;justify-content:center;margin-top:.35rem;}
+
+      .lf-nav .dropdown-menu,
+      .lf-navbar .dropdown-menu{
+        position:static!important;
+        float:none;
+        width:100%;
+        margin-top:0!important;
+        inset:auto;
+        transform:none!important;
+      }
+    }
+  </style>
+
+  <div class="lf-nav-wrap">
+    <nav class="lf-navbar navbar navbar-expand-lg">
+      <div class="container-fluid px-3 px-lg-4">
+
+        <a class="lf-brand" th:href="@{/dashboard}">
+          <div class="lf-brand-logo"><i class="bi bi-mortarboard-fill"></i></div>
+          <div>
+            <div class="lf-brand-text">Learn<span class="accent">ify</span></div>
+            <div class="lf-brand-tag">Learn • Practice • Get Certified</div>
+          </div>
+        </a>
+
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#lfNav"
+                aria-controls="lfNav" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="bi bi-list fs-3"></i>
+        </button>
+
+        <div class="collapse navbar-collapse" id="lfNav">
+
+          <form class="lf-search mx-lg-3 my-2 my-lg-0" role="search" onsubmit="return false;">
+            <i class="bi bi-search"></i>
+            <input type="search" placeholder="Search courses, assessments, certificates..." aria-label="Search">
+          </form>
+
+          <ul class="navbar-nav lf-nav mx-auto align-items-lg-center gap-1">
+
+            <li class="nav-item">
+              <a class="nav-link" th:href="@{/dashboard}">
+                <i class="bi bi-grid-1x2-fill"></i> Dashboard
+              </a>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" id="lfCoursesDropdown"
+                 data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-book-half"></i> Courses <i class="bi bi-chevron-down"></i>
+              </a>
+              <div class="dropdown-menu lf-mega" aria-labelledby="lfCoursesDropdown">
+                <div class="lf-mega-title">Courses</div>
+                <a class="lf-item dropdown-item" th:href="@{/courses}">
+                  <div class="lf-icon ic-blue"><i class="bi bi-collection-fill"></i></div>
+                  <div>Browse Courses<small>Explore the full catalog</small></div>
+                </a>
+                <a class="lf-item dropdown-item" th:href="@{/my-courses}">
+                  <div class="lf-icon ic-green"><i class="bi bi-bookmark-check-fill"></i></div>
+                  <div>My Courses<small>Continue where you left off</small></div>
+                </a>
+              </div>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" id="lfLearningDropdown"
+                 data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-mortarboard-fill"></i> Learning <i class="bi bi-chevron-down"></i>
+              </a>
+              <div class="dropdown-menu lf-mega" aria-labelledby="lfLearningDropdown">
+                <div class="lf-mega-title">My Learning</div>
+                <a class="lf-item dropdown-item" th:href="@{/attendance}">
+                  <div class="lf-icon ic-blue"><i class="bi bi-calendar2-check-fill"></i></div>
+                  <div>Attendance<small>Track your sessions</small></div>
+                </a>
+                <a class="lf-item dropdown-item" th:href="@{/my-tests}">
+                  <div class="lf-icon ic-amber"><i class="bi bi-pencil-square"></i></div>
+                  <div>Practice Tests<small>Sharpen your skills</small></div>
+                </a>
+                <a class="lf-item dropdown-item" th:href="@{/my-test-history}">
+                  <div class="lf-icon ic-violet"><i class="bi bi-clock-history"></i></div>
+                  <div>Test History<small>Review past attempts</small></div>
+                </a>
+              </div>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" id="lfCertificatesDropdown"
+                 data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-award-fill"></i> Certificates <i class="bi bi-chevron-down"></i>
+              </a>
+              <div class="dropdown-menu lf-mega" aria-labelledby="lfCertificatesDropdown">
+                <div class="lf-mega-title">Achievements</div>
+                <a class="lf-item dropdown-item" th:href="@{/my-certificates}">
+                  <div class="lf-icon ic-amber"><i class="bi bi-trophy-fill"></i></div>
+                  <div>My Certificates<small>Download & share</small></div>
+                </a>
+              </div>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" id="lfPaymentsDropdown"
+                 data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-credit-card-2-front-fill"></i> Payments <i class="bi bi-chevron-down"></i>
+              </a>
+              <div class="dropdown-menu lf-mega" aria-labelledby="lfPaymentsDropdown">
+                <div class="lf-mega-title">Billing</div>
+                <a class="lf-item dropdown-item" th:href="@{/payment-history}">
+                  <div class="lf-icon ic-green"><i class="bi bi-receipt"></i></div>
+                  <div>Payment History<small>Invoices & receipts</small></div>
+                </a>
+              </div>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" id="lfAiDropdown"
+                 data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-robot"></i> AI Assistant <i class="bi bi-chevron-down"></i>
+              </a>
+              <div class="dropdown-menu dropdown-menu-end lf-mega" aria-labelledby="lfAiDropdown">
+                <div class="lf-mega-title">Friday — Your AI Tutor</div>
+                <a class="lf-item dropdown-item" href="#" onclick="document.getElementById('chatbot-toggle')?.click();return false;">
+                  <div class="lf-icon ic-violet"><i class="bi bi-stars"></i></div>
+                  <div>Friday AI Assistant<small>Open the assistant</small></div>
+                </a>
+              </div>
+            </li>
+          </ul>
+
+          <div class="d-flex flex-wrap align-items-center gap-2 ms-lg-2">
+
+            <span class="lf-progress-chip d-none d-xl-inline-flex">
+              <span class="dot"></span>
+              Progress <span th:text="${attendancePercentage != null ? attendancePercentage + '%' : 'On track'}">82%</span>
+            </span>
+
+            <a class="lf-quick lf-quick-outline d-none d-md-inline-flex" th:href="@{/my-tests}">
+              <i class="bi bi-lightning-charge-fill text-warning"></i> AI Test
+            </a> 
+            <a class="lf-quick lf-quick-solid d-none d-md-inline-flex" th:href="@{/courses}">
+              <i class="bi bi-rocket-takeoff-fill"></i> Courses
+            </a>
+
+            <div class="dropdown">
+              <button class="lf-icon-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                      id="lfNotifDropdown" aria-label="Notifications">
+                <i class="bi bi-bell-fill"></i>
+                <span class="lf-badge">3</span>
+              </button>
+              <div class="dropdown-menu dropdown-menu-end lf-mega lf-notif" aria-labelledby="lfNotifDropdown">
+                <div class="lf-mega-title d-flex justify-content-between align-items-center">
+                  <span>Notifications</span>
+                  <span class="badge rounded-pill" style="background:var(--lf-primary);">3 new</span>
+                </div>
+                <div class="lf-notif-item">
+                  <div class="lf-icon ic-blue"><i class="bi bi-journal-bookmark-fill"></i></div>
+                  <div><div class="title">New Course Available</div><small>Java Advanced • 2m ago</small></div>
+                </div>
+                <div class="lf-notif-item">
+                  <div class="lf-icon ic-amber"><i class="bi bi-pencil-square"></i></div>
+                  <div><div class="title">Your AI Assessment is Ready</div><small>Due in 2 days</small></div>
+                </div>
+                <div class="lf-notif-item">
+                  <div class="lf-icon ic-green"><i class="bi bi-trophy-fill"></i></div>
+                  <div><div class="title">Congratulations! Your Certificate is Available 🎉</div><small>Download from My Certificates</small></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dropdown">
+              <div class="lf-profile" data-bs-toggle="dropdown" role="button" tabindex="0"
+                   id="lfProfileDropdown" aria-expanded="false" aria-label="Account">
+                <div class="lf-avatar"
+                     th:text="${session != null and session.user != null and session.user.name != null ? #strings.toUpperCase(#strings.substring(session.user.name,0,1)) : 'S'}">S</div>
+                <span class="lf-profile-name d-none d-sm-inline"
+                      th:text="${session != null and session.user != null ? session.user.name : 'Student'}">Student</span>
+                <i class="bi bi-chevron-down small text-muted"></i>
+              </div>
+              <div class="dropdown-menu dropdown-menu-end lf-mega" aria-labelledby="lfProfileDropdown" style="min-width:240px;">
+                <div class="px-2 pb-2 mb-2 border-bottom">
+                  <div style="font-weight:700;color:var(--lf-dark);"
+                       th:text="${session != null and session.user != null ? session.user.name : 'Student'}">Student</div>
+                  <small style="color:var(--lf-muted);">Learnify Student</small>
+                </div>
+                <a class="lf-item dropdown-item" th:href="@{/profile}">
+                  <div class="lf-icon ic-blue"><i class="bi bi-person-fill"></i></div>
+                  <div>My Profile</div>
+                </a>
+                <a class="lf-item dropdown-item" th:href="@{/my-certificates}">
+                  <div class="lf-icon ic-amber"><i class="bi bi-trophy-fill"></i></div>
+                  <div>My Certificates</div>
+                </a>
+                <a class="lf-item dropdown-item" th:href="@{/my-test-history}">
+                  <div class="lf-icon ic-violet"><i class="bi bi-clock-history"></i></div>
+                  <div>Test History</div>
+                </a>
+                <a class="lf-item dropdown-item" th:href="@{/payment-history}">
+                  <div class="lf-icon ic-green"><i class="bi bi-receipt"></i></div>
+                  <div>Payment History</div>
+                </a>
+                <div class="border-top mt-2 pt-2">
+                  <a class="lf-item dropdown-item" th:href="@{/logout}" style="color:#EF4444;">
+                    <div class="lf-icon" style="background:rgba(239,68,68,.12);color:#EF4444;">
+                      <i class="bi bi-box-arrow-right"></i>
+                    </div>
+                    <div>Logout</div>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+
+</body>
+</html>

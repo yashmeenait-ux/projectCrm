@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Learnify</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --sidebar-bg: #090d16;
+            --sidebar-hover: rgba(255, 255, 255, 0.05);
+            --sidebar-active: #2563eb;
+            --body-bg: #f8fafc;
+            --card-radius: 16px;
+            --lf-border: #e2e8f0;
+
+            /* Premium Minimal Shadows */
+            --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.03), 0 1px 2px -1px rgba(15, 23, 42, 0.02);
+            --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
+            --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+        }
+
+        body {
+            background-color: var(--body-bg);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Modern Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--body-bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        a:focus-visible,
+        button:focus-visible {
+            outline: 2px solid var(--sidebar-active);
+            outline-offset: 2px;
+            border-radius: 6px;
+        }
+
+        /* Sidebar Architecture */
+        .sidebar {
+            min-height: 100vh;
+            background-color: var(--sidebar-bg);
+            padding: 2.5rem 1.25rem !important;
+            position: fixed;
+            width: 260px;
+            z-index: 1030;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-brand {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 2.5rem;
+            padding: 0 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        .sidebar-brand-logo {
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+            color: #fff;
+            box-shadow: 0 6px 16px -4px rgba(37, 99, 235, 0.45);
+        }
+
+        .sidebar-toggle {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border-radius: 10px;
+            padding: 0.5rem 0.75rem;
+            margin-left: auto;
+        }
+        .sidebar-toggle:hover { background: rgba(255, 255, 255, 0.12); }
+
+        .sidebar a {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar a:hover {
+            background-color: var(--sidebar-hover);
+            color: #ffffff;
+            transform: translateX(4px);
+        }
+
+        .sidebar a.active {
+            background: linear-gradient(135deg, var(--sidebar-active), #1d4ed8);
+            color: #ffffff;
+            box-shadow: 0 8px 20px -6px rgba(37, 99, 235, 0.45);
+        }
+
+        /* Workspace Core Layout */
+        .main-content {
+            margin-left: 260px;
+            padding: 3rem 2.5rem;
+            width: calc(100% - 260px);
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 991.98px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                min-height: auto;
+                padding: 1.5rem 1rem !important;
+            }
+            .sidebar-brand {
+                margin-bottom: 0.75rem;
+            }
+            #sidebarNav.collapse:not(.show) {
+                display: none;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 2rem 1.25rem;
+            }
+        }
+
+        /* Smooth Entrance Micro-animations */
+        @keyframes adFadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: none; }
+        }
+        .ad-animate { animation: adFadeUp .4s cubic-bezier(0.4, 0, 0.2, 1) both; }
+        .ad-delay-1 { animation-delay: .05s; }
+        .ad-delay-2 { animation-delay: .10s; }
+        .ad-delay-3 { animation-delay: .15s; }
+        .ad-delay-4 { animation-delay: .20s; }
+        .ad-delay-5 { animation-delay: .25s; }
+        .ad-delay-6 { animation-delay: .30s; }
+
+        /* Premium Minimalist Stat Cards */
+        .stat-card {
+            border: 1px solid var(--lf-border);
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            background: white;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card .card-body {
+            padding: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-icon-box {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .trend-indicator {
+            font-size: 0.78rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: 6px;
+        }
+        .trend-up { background: #def7ec; color: #03543f; }
+
+        /* UI Color Accent Gradients */
+        .ic-students { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+        .ic-courses { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .ic-tests { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .ic-certificates { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .ic-purchases { background: rgba(6, 182, 212, 0.1); color: #06b6d4; }
+        .ic-revenue { background: rgba(15, 23, 42, 0.08); color: #0f172a; }
+
+        /* General Container Cards */
+        .dashboard-card {
+            border: 1px solid var(--lf-border);
+            border-radius: var(--card-radius);
+            background-color: #ffffff;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .dashboard-card .card-header {
+            background-color: transparent;
+            border-bottom: 1px solid var(--lf-border);
+            padding: 1.25rem 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            font-size: 0.95rem;
+        }
+
+        .dashboard-card .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Action Buttons Grid Layout */
+        .quick-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            border: 1px solid transparent;
+        }
+
+        .quick-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            filter: brightness(0.98);
+        }
+
+        /* Activity Feeds Stream Elements */
+        .activity-container {
+            max-height: 380px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        .activity-item {
+            position: relative;
+            border-left: 2px solid #f1f5f9;
+            padding-left: 20px;
+            padding-bottom: 1.5rem;
+        }
+
+        .activity-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--sidebar-active);
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .activity-item:last-child {
+            padding-bottom: 0;
+            border-left-color: transparent;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 3px;
+            font-size: 0.92rem;
+        }
+
+        .activity-meta {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container-fluid p-0">
+        <div class="d-flex flex-column flex-lg-row">
+
+            <div class="sidebar">
+                <div class="sidebar-brand text-white">
+                    <span class="sidebar-brand-logo"><i class="bi bi-mortarboard-fill"></i></span>
+                    <span>Learnify Admin</span>
+                    <button class="sidebar-toggle d-lg-none" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#sidebarNav"
+                            aria-controls="sidebarNav" aria-expanded="false" aria-label="Toggle admin menu">
+                        <i class="bi bi-list fs-5"></i>
+                    </button>
+                </div>
+                <nav class="nav flex-column collapse d-lg-block" id="sidebarNav">
+                    <a th:href="@{/admin/dashboard}" class="active" aria-current="page"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+                    <a th:href="@{/admin/students}"><i class="bi bi-people-fill"></i> Students</a>
+                    <a th:href="@{/admin/courses}"><i class="bi bi-book-fill"></i> Courses</a>
+                    <a th:href="@{/admin/payments}"><i class="bi bi-credit-card-fill"></i> Payments</a>
+                    <a th:href="@{/admin/attendance}"><i class="bi bi-calendar-check-fill"></i> Attendance</a>
+                    <a th:href="@{/admin/results}"><i class="bi bi-file-earmark-text-fill"></i> Test Results</a>
+                    <a th:href="@{/admin/certificates}"><i class="bi bi-award-fill"></i> Certificates</a>
+                    <a th:href="@{/admin/history}"><i class="bi bi-clock-history"></i> Activity Logs</a>
+                    <hr class="text-secondary border-opacity-25 my-3">
+                    <a th:href="@{/logout}" class="text-danger fw-bold"><i class="bi bi-power"></i> Logout</a>
+                </nav>
+            </div>
+
+            <div class="main-content flex-grow-1">
+
+                <div class="d-flex justify-content-between align-items-center mb-5 ad-animate">
+                    <div>
+                        <h2 class="fw-extrabold m-0 tracking-tight text-dark">
+                            Welcome back, Admin 👋
+                        </h2>
+                        <p class="text-muted small m-0 mt-1">Monitor students, courses, assessments, payments, and platform performance from one dashboard.</p>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-5">
+                    <div class="col-12 col-sm-6 col-xl-4">
+                        <div class="card stat-card ad-animate ad-delay-1">
+                            <div class="card-body">
+                                <div class="stat-icon-box ic-students"><i class="bi bi-people-fill"></i></div>
+                                <span class="text-uppercase fw-bold text-muted small tracking-wider" style="font-size: 0.7rem;">Total Students</span>
+                                <div class="d-flex align-items-baseline mt-1">
+                                    <h3 class="mb-0 fw-extrabold text-dark display-6 counting-num" th:text="${studentsCount}">0</h3>
+                                    <span class="trend-indicator trend-up"><i class="bi bi-arrow-up-short"></i> 12%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-4">
+                        <div class="card stat-card ad-animate ad-delay-2">
+                            <div class="card-body">
+                                <div class="stat-icon-box ic-courses"><i class="bi bi-book-fill"></i></div>
+                                <span class="text-uppercase fw-bold text-muted small tracking-wider" style="font-size: 0.7rem;">Total Courses</span>
+                                <div class="d-flex align-items-baseline mt-1">
+                                    <h3 class="mb-0 fw-extrabold text-dark display-6" th:text="${coursesCount}">0</h3>
+                                    <span class="trend-indicator trend-up"><i class="bi bi-arrow-up-short"></i> 4%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-4">
+                        <div class="card stat-card ad-animate ad-delay-3">
+                            <div class="card-body">
+                                <div class="stat-icon-box ic-tests"><i class="bi bi-file-earmark-text-fill"></i></div>
+                                <span class="text-uppercase fw-bold text-muted small tracking-wider" style="font-size: 0.7rem;">Total Tests</span>
+                                <div class="d-flex align-items-baseline mt-1">
+                                    <h3 class="mb-0 fw-extrabold text-dark display-6" th:text="${testsCount}">0</h3>
+                                    <span class="trend-indicator trend-up"><i class="bi bi-arrow-up-short"></i> 8%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-4">
+                        <div class="card stat-card ad-animate ad-delay-4">
+                            <div class="card-body">
+                                <div class="stat-icon-box ic-certificates"><i class="bi bi-award-fill"></i></div>
+                                <span class="text-uppercase fw-bold text-muted small tracking-wider" style="font-size: 0.7rem;">Certificates Issued</span>
+                                <div class="d-flex align-items-baseline mt-1">
+                                    <h3 class="mb-0 fw-extrabold text-dark display-6" th:text="${certificatesCount}">0</h3>
+                                    <span class="trend-indicator trend-up"><i class="bi bi-arrow-up-short"></i> 15%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-4">
+                        <div class="card stat-card ad-animate ad-delay-5">
+                            <div class="card-body">
+                                <div class="stat-icon-box ic-purchases"><i class="bi bi-cart-check-fill"></i></div>
+                                <span class="text-uppercase fw-bold text-muted small tracking-wider" style="font-size: 0.7rem;">Total Purchases</span>
+                                <div class="d-flex align-items-baseline mt-1">
+                                    <h3 class="mb-0 fw-extrabold text-dark display-6" th:text="${purchasesCount}">0</h3>
+                                    <span class="trend-indicator trend-up"><i class="bi bi-arrow-up-short"></i> 10%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-4">
+                        <div class="card stat-card ad-animate ad-delay-6">
+                            <div class="card-body">
+                                <div class="stat-icon-box ic-revenue"><i class="bi bi-cash-stack"></i></div>
+                                <span class="text-uppercase fw-bold text-muted small tracking-wider" style="font-size: 0.7rem;">Total Revenue</span>
+                                <div class="d-flex align-items-baseline mt-1">
+                                    <h3 class="mb-0 fw-extrabold text-dark display-6" th:text="${totalRevenue}">₹0</h3>
+                                    <span class="trend-indicator trend-up"><i class="bi bi-arrow-up-short"></i> 18%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card dashboard-card mb-4 border-light shadow-sm rounded-4">
+                    <div class="card-header d-flex align-items-center gap-2 text-secondary">
+                        <i class="bi bi-lightning-charge-fill text-warning"></i> Quick Actions
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-6 col-md-3">
+                                <a th:href="@{/admin/courses}" class="btn bg-primary bg-opacity-10 text-primary quick-btn w-100">
+                                    <i class="bi bi-folder2-open"></i> Manage Courses
+                                </a>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <a th:href="@{/admin/students}" class="btn bg-info bg-opacity-10 text-info quick-btn w-100">
+                                    <i class="bi bi-person-lines-fill"></i> Students
+                                </a>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <a th:href="@{/admin/payments}" class="btn bg-success bg-opacity-10 text-success quick-btn w-100">
+                                    <i class="bi bi-receipt-cutoff"></i> Payments
+                                </a>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <a th:href="@{/admin/history}" class="btn bg-secondary bg-opacity-10 text-secondary quick-btn w-100">
+                                    <i class="bi bi-shield-shaded"></i> Activity Logs
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-xl-6">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-header d-flex align-items-center gap-2">
+                                <i class="bi bi-graph-up-arrow text-primary"></i> Student Growth
+                            </div>
+                            <div class="card-body">
+                                <div style="position: relative; height:240px; width:100%;">
+                                    <canvas id="studentChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-6">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-header d-flex align-items-center gap-2">
+                                <i class="bi bi-currency-exchange text-success"></i> Revenue Overview
+                            </div>
+                            <div class="card-body">
+                                <div style="position: relative; height:240px; width:100%;">
+                                    <canvas id="revenueChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-header d-flex align-items-center gap-2"><i class="bi bi-pie-chart-fill text-info"></i> Course Distribution</div>
+                            <div class="card-body d-flex align-items-center justify-content-center">
+                                <div style="width: 100%; max-width: 200px; height:200px; position:relative;">
+                                    <canvas id="courseSalesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-header d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-success"></i> Assessment Results</div>
+                            <div class="card-body d-flex align-items-center justify-content-center">
+                                <div style="width: 100%; max-width: 200px; height:200px; position:relative;">
+                                    <canvas id="testResultsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-header d-flex align-items-center gap-2"><i class="bi bi-calendar-check-fill text-warning"></i> Attendance Overview</div>
+                            <div class="card-body d-flex align-items-center justify-content-center">
+                                <div style="width: 100%; max-width: 200px; height:200px; position:relative;">
+                                    <canvas id="attendanceChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-header d-flex align-items-center gap-2"><i class="bi bi-award-fill text-danger"></i> Certificates</div>
+                            <div class="card-body d-flex align-items-center justify-content-center">
+                                <div style="width: 100%; max-width: 200px; height:200px; position:relative;">
+                                    <canvas id="certificateChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="card dashboard-card">
+                            <div class="card-header d-flex align-items-center gap-2">
+                                <i class="bi bi-activity text-dark"></i> Recent Activity
+                            </div>
+                            <div class="card-body">
+                                <div class="activity-container">
+                                    <div th:each="activity : ${activities}" class="activity-item">
+                                        <div class="activity-title" th:text="${activity.activity}">Activity Statement Summary Log</div>
+                                        <div class="activity-meta">
+                                            By:
+                                            <span class="fw-semibold text-dark" th:text="${activity.adminName}">Authorized Administrator Name</span>
+                                            &bull;
+                                            Date & Time: <span class="font-monospace text-secondary" th:text="${activity.activityTime}">Timestamp Mapped Metric</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div th:if="${#lists.isEmpty(activities)}" class="text-center py-5 text-muted">
+                                        <i class="bi bi-cloud-slash fs-2 mb-2 d-block text-secondary opacity-40"></i>
+                                        No recent activity found.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script th:inline="javascript">
+    // Context Model Matrix Attributes Mapping Injection Binding Blocks
+    const studentsCount = /*[[${studentsCount}]]*/ 0;
+    const coursesCount = /*[[${coursesCount}]]*/ 0;
+    const testsCount = /*[[${testsCount}]]*/ 0;
+    const certificatesCount = /*[[${certificatesCount}]]*/ 0;
+    const purchasesCount = /*[[${purchasesCount}]]*/ 0;
+    const totalRevenue = /*[[${totalRevenue}]]*/ 0;
+    const passed = /*[[${passed}]]*/ 0;
+    const failed = /*[[${failed}]]*/ 0;
+    const present = /*[[${present}]]*/ 0;
+    const absent = /*[[${absent}]]*/ 0;
+    const monthlyRevenue = /*[[${monthlyRevenue}]]*/ [];
+
+    // Chart Configuration Options Block 
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: "bottom",
+                labels: {
+                    boxWidth: 10,
+                    usePointStyle: true,
+                    font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' },
+                    padding: 16
+                }
+            }
+        }
+    };
+
+    // ==========================================
+    // 1. Student Chart
+    // ==========================================
+    new Chart(document.getElementById("studentChart"), {
+        type: "bar",
+        data: {
+            labels: ["Active Base"],
+            datasets: [{
+                label: "Students",
+                data: [studentsCount],
+                backgroundColor: "#2563eb",
+                borderRadius: 8,
+                maxBarThickness: 40
+            }]
+        },
+        options: chartOptions
+    });
+
+    // ==========================================
+    // 2. Revenue Chart
+    // ==========================================
+    new Chart(document.getElementById("revenueChart"), {
+        type: "line",
+        data: {
+            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+            datasets: [{
+                label: "Revenue (₹)",
+                data: monthlyRevenue,
+                borderColor: "#10b981",
+                backgroundColor: "rgba(16,185,129,0.04)",
+                fill: true,
+                tension: 0.35,
+                borderWidth: 3,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointBackgroundColor: "#10b981"
+            }]
+        },
+        options: chartOptions
+    });
+
+    // ==========================================
+    // 3. Course Chart
+    // ==========================================
+    new Chart(document.getElementById("courseSalesChart"), {
+        type: "doughnut",
+        data: {
+            labels: ["Java Full Stack", "Spring Boot", "React", "Python"],
+            datasets: [{
+                data: [45, 25, 15, 10],
+                backgroundColor: ["#2563eb", "#10b981", "#f59e0b", "#ef4444"],
+                borderWidth: 0
+            }]
+        },
+        options: { ...chartOptions, cutout: "75%" }
+    });
+
+    // ==========================================
+    // 4. Activity Feed Results
+    // ==========================================
+    new Chart(document.getElementById("testResultsChart"), {
+        type: "doughnut",
+        data: {
+            labels: ["Passed", "Failed"],
+            datasets: [{
+                data: [passed, failed],
+                backgroundColor: ["#10b981", "#ef4444"],
+                borderWidth: 0
+            }]
+        },
+        options: { ...chartOptions, cutout: "75%" }
+    });
+
+    // ==========================================
+    // 5. Attendance Chart
+    // ==========================================
+    new Chart(document.getElementById("attendanceChart"), {
+        type: "doughnut",
+        data: {
+            labels: ["Present", "Absent"],
+            datasets: [{
+                data: [present, absent],
+                backgroundColor: ["#6366f1", "#e2e8f0"],
+                borderWidth: 0
+            }]
+        },
+        options: { ...chartOptions, cutout: "75%" }
+    });
+
+    // ==========================================
+    // 6. Certificate Chart
+    // ==========================================
+    new Chart(document.getElementById("certificateChart"), {
+        type: "doughnut",
+        data: {
+            labels: ["Certified", "Pending"],
+            datasets: [{
+                data: [certificatesCount, Math.max(studentsCount - certificatesCount, 0)],
+                backgroundColor: ["#8b5cf6", "#f1f5f9"],
+                borderWidth: 0
+            }]
+        },
+        options: { ...chartOptions, cutout: "75%" }
+    });
+
+    // Soft Micro-Interactions On Loaded Document Layout Component
+    window.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".stat-card").forEach((card, index) => {
+            card.style.opacity = "0";
+            card.style.transform = "translateY(15px)";
+            setTimeout(() => {
+                card.style.transition = "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)";
+                card.style.opacity = "1";
+                card.style.transform = "translateY(0)";
+            }, index * 60);
+        });
+    });
+</script>
+</body>
+</html>

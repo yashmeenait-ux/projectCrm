@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Learnify</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root{
+            --lf-primary:#2563EB; --lf-primary-dark:#1D4ED8;
+            --lf-success:#10B981; --lf-warning:#F59E0B; --lf-danger:#EF4444;
+            --lf-dark:#1E293B;    --lf-bg:#F8FAFC;
+            --lf-muted:#64748B;   --lf-border:#E2E8F0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #f5f3ff 100%);
+            min-height: 100vh;
+            color: var(--lf-dark);
+        }
+
+        /* Fade-in entrance */
+        @keyframes loginFadeUp{
+            from{opacity:0; transform:translateY(16px);}
+            to{opacity:1; transform:none;}
+        }
+        .login-animate{ animation: loginFadeUp .55s ease both; }
+
+        .login-card {
+            border: none;
+            border-radius: 24px;
+            background: #ffffff;
+            box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.12);
+            overflow: hidden;
+        }
+
+        /* ===== Brand side panel ===== */
+        .login-brand-panel{
+            background: linear-gradient(150deg, var(--lf-primary) 0%, var(--lf-primary-dark) 55%, #4F46E5 100%);
+            color: #fff;
+            padding: 3rem 2.5rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 100%;
+            overflow: hidden;
+        }
+        .login-brand-panel::before{
+            content:'';
+            position:absolute; inset:0;
+            background-image:
+                radial-gradient(circle at 15% 20%, rgba(255,255,255,.16) 0, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(255,255,255,.12) 0, transparent 45%);
+        }
+        .login-brand-logo{
+            width:54px; height:54px; border-radius:16px;
+            background: rgba(255,255,255,.16);
+            backdrop-filter: blur(6px);
+            display:flex; align-items:center; justify-content:center;
+            font-size:1.6rem; color:#fff; margin-bottom:1.5rem;
+            position: relative; z-index: 2;
+            border:1px solid rgba(255,255,255,.25);
+        }
+        .login-brand-panel h2{
+            font-weight: 800; letter-spacing:-.02em; position:relative; z-index:2;
+        }
+        .login-brand-panel p{
+            color: rgba(255,255,255,.85); position:relative; z-index:2; font-size:.95rem;
+        }
+        .login-feature-list{
+            list-style:none; padding:0; margin: 1.75rem 0 0; position:relative; z-index:2;
+        }
+        .login-feature-list li{
+            display:flex; align-items:center; gap:.75rem;
+            font-weight:600; font-size:.9rem; margin-bottom:1rem;
+            color: rgba(255,255,255,.95);
+        }
+        .login-feature-list .feat-icon{
+            width:34px; height:34px; border-radius:10px;
+            background: rgba(255,255,255,.14);
+            display:flex; align-items:center; justify-content:center;
+            font-size:1rem; flex-shrink:0;
+            border:1px solid rgba(255,255,255,.18);
+        }
+
+        /* ===== Form side ===== */
+        .login-form-side{
+            padding: 3rem 2.5rem;
+        }
+
+        .brand-title {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        /* Floating label inputs with leading icon */
+        .lf-field{ position: relative; margin-bottom: 1.1rem; }
+        .lf-field .form-control{
+            border-color: var(--lf-border);
+            border-radius: 12px;
+            padding: 1rem 0.9rem 0.4rem 2.75rem;
+            height: calc(3.3rem + 2px);
+            font-size: 0.95rem;
+            background-color: #fdfdfd;
+            transition: all 0.2s ease-in-out;
+        }
+        .lf-field .form-control:focus{
+            border-color: var(--lf-primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+            background-color: #ffffff;
+        }
+        .lf-field label{
+            position:absolute;
+            top:0; left:2.75rem;
+            height:100%;
+            padding:1rem 0;
+            pointer-events:none;
+            color: var(--lf-muted);
+            font-weight:600; font-size:.92rem;
+            transform-origin: 0 0;
+            transition: opacity .1s ease-in-out, transform .1s ease-in-out;
+        }
+        .lf-field .form-control::placeholder{ color: transparent; }
+        .lf-field .form-control:focus ~ label,
+        .lf-field .form-control:not(:placeholder-shown) ~ label{
+            transform: scale(.78) translateY(-.6rem) translateX(.05rem);
+            color: var(--lf-primary);
+            opacity: .9;
+        }
+        .lf-field-icon{
+            position:absolute; left:0.95rem; top:0; height:100%;
+            display:flex; align-items:center;
+            color: var(--lf-muted); font-size:1.05rem;
+            transition: color .2s ease;
+            pointer-events:none;
+            z-index:3;
+        }
+        .lf-field .form-control:focus ~ .lf-field-icon{ color: var(--lf-primary); }
+
+        /* Password visibility toggle */
+        .lf-pass-toggle{
+            position:absolute; right:0.85rem; top:0; height:100%;
+            display:flex; align-items:center;
+            background:none; border:none; color: var(--lf-muted);
+            font-size:1.05rem; cursor:pointer; z-index:4;
+            transition: color .2s ease;
+        }
+        .lf-pass-toggle:hover{ color: var(--lf-primary); }
+        .lf-pass-toggle:focus-visible{
+            outline:2px solid var(--lf-primary); outline-offset:2px; border-radius:6px;
+        }
+
+        .form-check-input:checked{
+            background-color: var(--lf-primary);
+            border-color: var(--lf-primary);
+        }
+        .form-check-input:focus{
+            box-shadow: 0 0 0 4px rgba(37,99,235,.12);
+        }
+
+        .lf-link{
+            text-decoration:none; font-weight:700; color: var(--lf-primary);
+            transition: color .2s ease;
+        }
+        .lf-link:hover{ color: var(--lf-primary-dark); text-decoration:underline; }
+        .lf-link:focus-visible{
+            outline:2px solid var(--lf-primary); outline-offset:2px; border-radius:4px;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, var(--lf-primary) 0%, var(--lf-primary-dark) 100%);
+            border: none;
+            padding: 0.85rem;
+            font-weight: 700;
+            font-size: 0.98rem;
+            border-radius: 12px;
+            display:flex; align-items:center; justify-content:center; gap:.5rem;
+            box-shadow: 0 10px 24px -8px rgba(37, 99, 235, 0.45);
+            transition: all 0.25s ease;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px -8px rgba(37, 99, 235, 0.55);
+        }
+        .btn-login:focus-visible{
+            outline:2px solid #fff; outline-offset:2px;
+        }
+
+        @media (max-width: 991.98px){
+            .login-form-side{ padding: 2.25rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+  <div th:replace="~{fragments/Header :: crm-header}"></div>
+
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 85vh;">
+        <div class="col-xl-9 col-lg-10">
+
+            <div class="card login-card login-animate">
+                <div class="row g-0">
+
+                    <!-- BRAND PANEL -->
+                    <div class="col-lg-5 d-none d-lg-flex">
+                        <div class="login-brand-panel">
+                            <div class="login-brand-logo">
+                                <i class="bi bi-mortarboard-fill"></i>
+                            </div>
+                            <h2 class="mb-2">Welcome back to Learnify</h2>
+                            <p class="mb-0">Sign in to continue your learning journey — pick up exactly where you left off.</p>
+
+                            <ul class="login-feature-list">
+                                <li>
+                                    <span class="feat-icon"><i class="bi bi-collection-play-fill"></i></span>
+                                    Access all your enrolled courses
+                                </li>
+                                <li>
+                                    <span class="feat-icon"><i class="bi bi-graph-up-arrow"></i></span>
+                                    Track attendance & progress
+                                </li>
+                                <li>
+                                    <span class="feat-icon"><i class="bi bi-award-fill"></i></span>
+                                    Download certificates anytime
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- FORM PANEL -->
+                    <div class="col-lg-7">
+                        <div class="login-form-side">
+
+                            <div class="text-center mb-4">
+                                <h1 class="brand-title m-0">
+                                    <span style="color:var(--lf-primary);">Learn</span><span style="color:var(--lf-primary-dark);">ify</span>
+                                </h1>
+                                <p class="text-muted small mt-1 mb-0">
+                                    <i class="bi bi-stars" style="color:var(--lf-warning);"></i>
+                                    Learn. Practice. Grow.
+                                </p>
+                            </div>
+
+                            <div th:if="${param.error != null or error != null}"
+                                 class="alert alert-danger border-0 shadow-sm rounded-3 text-center mb-4 py-2 small fw-medium">
+
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+
+                                <span th:text="${error != null ? error : 'Invalid email or password.'}">
+                                    Incorrect Credentials
+                                </span>
+
+                            </div>
+                            <div th:if="${param.logout}" class="alert alert-success border-0 shadow-sm rounded-3 text-center mb-4 py-2 small fw-medium">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                <span>You have been successfully signed out.</span>
+                            </div>
+
+                            <form th:action="@{/login}" method="post">
+
+                                <div class="lf-field">
+                                    <span class="lf-field-icon"><i class="bi bi-envelope-fill"></i></span>
+                                    <input type="email" name="email" id="loginEmail" class="form-control" placeholder="Email Address" required>
+                                    <label for="loginEmail">Email Address</label>
+                                </div>
+
+                                <div class="lf-field">
+                                    <span class="lf-field-icon"><i class="bi bi-key-fill"></i></span>
+                                    <input type="password" name="password" id="loginPassword" class="form-control" placeholder="Password" required>
+                                    <label for="loginPassword">Password</label>
+                                    <button type="button" class="lf-pass-toggle" id="lfTogglePassword" aria-label="Show password" aria-pressed="false">
+                                        <i class="bi bi-eye-fill" id="lfToggleIcon"></i>
+                                    </button>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-4" style="font-size: 0.88rem;">
+                                    <div class="form-check m-0 d-flex align-items-center gap-2">
+                                        <input class="form-check-input m-0" type="checkbox" id="rememberMe" name="remember-me">
+                                        <label class="form-check-label text-secondary fw-medium" for="rememberMe">Remember Me</label>
+                                    </div>
+                                    <a href="#" class="lf-link" style="font-size:.88rem;">Forgot Password?</a>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-login w-100 text-white">
+                                    <i class="bi bi-box-arrow-in-right"></i>
+                                    Sign In to Portal
+                                </button>
+                            </form>
+
+                            <div class="text-center mt-4 pt-2">
+                                <p class="mb-0 small text-secondary">
+                                    Don't have an account?
+                                    <a th:href="@{/register}" class="lf-link ms-1">Register</a>
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+ <div th:replace="~{fragments/footer :: crm-footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Password show/hide toggle — purely visual, does not affect form submission
+    document.getElementById('lfTogglePassword').addEventListener('click', function () {
+        const pwd = document.getElementById('loginPassword');
+        const icon = document.getElementById('lfToggleIcon');
+        const isHidden = pwd.type === 'password';
+        pwd.type = isHidden ? 'text' : 'password';
+        icon.className = isHidden ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill';
+        this.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+        this.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+    });
+</script>
+</body>
+</html>

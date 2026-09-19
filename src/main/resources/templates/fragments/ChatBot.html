@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="friday-chatbot">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --primary: #2563EB;
+    --secondary: #7C3AED;
+    --accent: #3B82F6;
+    --bg-main: #F8FAFC;
+    --text-main: #1E293B;
+    --text-muted: #64748B;
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --glass-shadow: 0 20px 40px rgba(15, 23, 42, 0.1), 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.chat-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    border: 2px solid var(--glass-border);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 999999;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: floatBtn 3s ease-in-out infinite;
+}
+
+@keyframes floatBtn {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+    100% { transform: translateY(0px); }
+}
+
+.chat-button:hover {
+    transform: scale(1.08) translateY(-3px);
+    box-shadow: 0 15px 30px rgba(37, 99, 235, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+}
+
+.chat-button::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 14px;
+    height: 14px;
+    background-color: #10B981;
+    border: 2px solid #F8FAFC;
+    border-radius: 50%;
+    animation: pulseBadge 2s infinite;
+}
+
+@keyframes pulseBadge {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.chat-button svg {
+    width: 32px;
+    height: 32px;
+}
+
+.chat-box {
+    position: fixed;
+    bottom: 110px;
+    right: 30px;
+    width: 440px;
+    height: 680px;
+    max-height: calc(100vh - 140px);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 28px;
+    box-shadow: var(--glass-shadow);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 999999;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.chat-header {
+    background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    flex-shrink: 0;
+}
+
+.chat-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.chat-header-avatar {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
+}
+
+.chat-header-avatar svg {
+    width: 26px;
+    height: 26px;
+}
+
+.status-dot {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    background-color: #10B981;
+    border: 2px solid #2563EB;
+    border-radius: 50%;
+}
+
+.chat-header-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-title {
+    color: white;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.3px;
+    margin: 0;
+}
+
+.chat-subtitle {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 12px;
+    font-weight: 500;
+    margin: 0;
+}
+
+.close-panel-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.close-panel-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.chat-messages {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 24px;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.welcome-card {
+    background: white;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.02);
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.kurumi-logo {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 16px auto;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+    color: white;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
+}
+
+.kurumi-logo svg {
+    width: 32px;
+    height: 32px;
+}
+
+.welcome-card h4 {
+    color: var(--text-main);
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+}
+
+.welcome-card p {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.welcome-card p:nth-of-type(2) {
+    background: #F1F5F9;
+    padding: 10px 14px;
+    border-radius: 12px;
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.features-list {
+    text-align: left;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 20px;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.features-list li {
+    font-size: 13px;
+    color: var(--text-main);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.quick-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.quick-grid button {
+    border: 1px solid #E2E8F0;
+    background: white;
+    color: var(--text-main);
+    padding: 14px 12px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.02);
+}
+
+.quick-grid button:hover {
+    background: white;
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.08);
+}
+
+.ai-message {
+    background: white;
+    color: var(--text-main);
+    padding: 14px 18px;
+    border-radius: 4px 18px 18px 18px;
+    margin-bottom: 0;
+    max-width: 85%;
+    font-size: 14.5px;
+    line-height: 1.6;
+    align-self: flex-start;
+    box-shadow: 0 4px 15px rgba(15, 23, 42, 0.03);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.user-message {
+    background: linear-gradient(135deg, var(--primary) 0%, #1D4ED8 100%);
+    color: white;
+    padding: 14px 18px;
+    border-radius: 18px 4px 18px 18px;
+    margin-bottom: 0;
+    max-width: 85%;
+    margin-left: auto;
+    font-size: 14.5px;
+    line-height: 1.6;
+    align-self: flex-end;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+}
+
+.chat-footer {
+    padding: 18px 24px 24px 24px;
+    background: white;
+    border-top: 1px solid #E2E8F0;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.chat-footer input {
+    width: 100%;
+    padding: 14px 48px 14px 16px;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 16px;
+    background: #F8FAFC;
+    color: var(--text-main);
+    font-size: 14px;
+    font-weight: 500;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.chat-footer input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.input-icon-placeholder {
+    position: absolute;
+    right: 16px;
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.chat-footer button {
+    width: 100%;
+    border: none;
+    padding: 14px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: -0.2px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    transition: all 0.2s ease;
+}
+
+.chat-footer button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+}
+
+.typing {
+    background: white;
+    color: var(--text-main);
+    padding: 14px 18px;
+    border-radius: 4px 18px 18px 18px;
+    margin-bottom: 0;
+    max-width: 85%;
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 15px rgba(15, 23, 42, 0.03);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.typing-avatar {
+    width: 28px;
+    height: 28px;
+    background: #EFF6FF;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.typing-avatar svg {
+    width: 18px;
+    height: 18px;
+}
+
+.typing span {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.typing-dots span {
+    width: 6px;
+    height: 6px;
+    background-color: var(--primary);
+    border-radius: 50%;
+    display: inline-block;
+    animation: bounceDot 1.4s infinite ease-in-out both;
+}
+
+.typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+.typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounceDot {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1.0); }
+}
+
+@media(max-width:768px){
+    .chat-box{
+        width: calc(100% - 32px);
+        right: 16px;
+        left: 16px;
+        height: calc(100vh - 120px);
+        bottom: 90px;
+        border-radius: 24px;
+    }
+    .chat-button {
+        bottom: 20px;
+        right: 20px;
+    }
+}
+</style>
+
+<div id="chatButton" class="chat-button">
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M46 50C46 42.268 39.732 36 32 36C24.268 36 18 42.268 18 50" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="32" cy="23" r="8" fill="#FFFFFF"/>
+        <path d="M22 24C21 17 26 12 32 12C38 12 43 17 42 24C40 20 37 19 32 19C27 19 24 20 22 24Z" fill="#FFFFFF"/>
+    </svg>
+</div>
+
+<div id="chatBox" class="chat-box">
+
+    <div class="chat-header">
+        <div class="chat-header-left">
+            <div class="chat-header-avatar">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M46 52C46 44.268 39.732 38 32 38C24.268 38 18 44.268 18 52" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+                    <circle cx="32" cy="24" r="9" fill="#FFFFFF"/>
+                    <path d="M21 25C20 17 25 12 32 12C39 12 44 17 43 25C41 21 37 20 32 20C27 20 23 21 21 25Z" fill="#FFFFFF"/>
+                </svg>
+                <div class="status-dot"></div>
+            </div>
+            <div class="chat-header-text">
+                <div class="chat-title">FRIDAY</div>
+                <div class="chat-subtitle">Official Learnify AI Assistant</div>
+            </div>
+        </div>
+        <button class="close-panel-btn" id="closeChatBtn" onclick="document.getElementById('chatButton').click()">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+            </svg>
+        </button>
+    </div>
+
+    <div id="chatMessages" class="chat-messages">
+        <div class="welcome-card">
+            <div class="kurumi-logo">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M48 54C48 45.163 40.837 38 32 38C23.163 38 16 45.163 16 54" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round"/>
+                    <circle cx="32" cy="23" r="10" fill="#FFFFFF"/>
+                    <path d="M19 25C18 16 24 10 32 10C40 10 46 16 45 25C43 21 38 19 32 19C26 19 21 21 19 25Z" fill="#FFFFFF"/>
+                </svg>
+            </div>
+
+            <h4>FRIDAY</h4>
+            <p>Official AI Assistant of Learnify</p>
+
+            <p>
+                Hello 
+                <strong th:text="${session.user.name}">Student</strong>!
+            </p>
+
+            <p style="text-align: left; font-size: 13.5px; color: var(--text-muted); margin-bottom: 16px;">
+                I am FRIDAY, your premium academic co-pilot. I can seamlessly pull information and guide you through your learning dashboard.
+            </p>
+
+            <ul class="features-list">
+                <li><span>📊</span> Attendance metrics</li>
+                <li><span>📚</span> Purchased Courses & content</li>
+                <li><span>🏆</span> Credentials & Certificates</li>
+                <li><span>📝</span> Real-time Test Results</li>
+                <li><span>💡</span> Personalized Learning Guidance</li>
+            </ul>
+
+            <div class="quick-grid">
+                <button onclick="askQuick('What is my attendance percentage?')">
+                    <span>📊</span> Attendance
+                </button>
+                <button onclick="askQuick('Which courses have I purchased?')">
+                    <span>📚</span> Courses
+                </button>
+                <button onclick="askQuick('Show my certificates')">
+                    <span>🏆</span> Certificates
+                </button>
+                <button onclick="askQuick('Show my latest test result')">
+                    <span>📝</span> Tests
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-footer">
+        <div class="input-container">
+            <input type="text" id="question" placeholder="Ask FRIDAY anything...">
+            <div class="input-icon-placeholder">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0V3z"/>
+                    <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                </svg>
+            </div>
+        </div>
+        <button id="sendBtn">Send Message</button>
+    </div>
+
+</div>
+
+<script>
+const btn = document.getElementById("chatButton");
+const box = document.getElementById("chatBox");
+const sendBtn = document.getElementById("sendBtn");
+const messages = document.getElementById("chatMessages");
+
+btn.onclick = () => {
+    if (box.style.display === "flex") {
+        box.style.display = "none";
+        box.classList.remove("show");
+    } else {
+        box.style.display = "flex";
+        setTimeout(() => box.classList.add("show"), 10);
+    }
+};
+
+function askQuick(text){
+    document.getElementById("question").value = text;
+    sendBtn.click();
+}
+
+document.getElementById("question").addEventListener("keypress", function(e){
+    if(e.key === "Enter"){
+        sendBtn.click();
+    }
+});
+
+sendBtn.onclick = function(){
+    const question = document.getElementById("question");
+
+    if(question.value.trim()==="")
+        return;
+
+    messages.innerHTML +=
+    `<div class="user-message">
+        ${question.value}
+    </div>`;
+
+    messages.innerHTML +=
+    `<div id="typing" class="typing">
+        <div class="typing-avatar">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M46 52C46 44.268 39.732 38 32 38C24.268 38 18 44.268 18 52" stroke="#2563EB" stroke-width="4" stroke-linecap="round"/>
+                <circle cx="32" cy="24" r="9" fill="#2563EB"/>
+                <path d="M21 25C20 17 25 12 32 12C39 12 44 17 43 25C41 21 37 20 32 20C27 20 23 21 21 25Z" fill="#2563EB"/>
+            </svg>
+        </div>
+        <span>FRIDAY is thinking...</span>
+        <div class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>`;
+
+    messages.scrollTop = messages.scrollHeight;
+
+    fetch('/ask-ai',{
+        method:'POST',
+        headers:{
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'question=' + encodeURIComponent(question.value)
+    })
+    .then(response=>response.text())
+    .then(data=>{
+        document.getElementById("typing").remove();
+
+        messages.innerHTML +=
+        `<div class="ai-message">
+            ${data}
+        </div>`;
+
+        messages.scrollTop = messages.scrollHeight;
+    });
+
+    question.value="";
+};
+</script>
+
+</div>
+
+</body>
+</html>

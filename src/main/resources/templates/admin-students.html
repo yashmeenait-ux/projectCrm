@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management | Learnify Admin</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --lf-primary: #2563eb;
+            --lf-primary-dark: #1d4ed8;
+            --lf-success: #10b981;
+            --lf-danger: #ef4444;
+            --lf-dark: #0f172a;
+            --lf-sidebar-bg: #090d16;
+            --lf-bg: #f8fafc;
+            --lf-border: #e2e8f0;
+            --lf-card-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--lf-bg);
+            color: var(--lf-dark);
+            overflow-x: hidden;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Responsive Sidebar Navigation Layout */
+        .sidebar {
+            min-height: 100vh;
+            background: var(--lf-sidebar-bg);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 2.5rem 1.25rem !important;
+            position: fixed;
+            width: 260px;
+            z-index: 1030;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-brand {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 2.5rem;
+            padding: 0 0.5rem;
+            color: #ffffff;
+        }
+
+        .sidebar a {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.8rem 1rem;
+            margin-bottom: 6px;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            transform: translateX(4px);
+        }
+
+        .sidebar a.active {
+            background: linear-gradient(135deg, var(--lf-primary), var(--lf-primary-dark));
+            color: #ffffff;
+            box-shadow: 0 8px 20px -6px rgba(37, 99, 235, 0.45);
+        }
+
+        /* Content Shell Layout */
+        .main-content {
+            margin-left: 260px;
+            padding: 3rem 2.5rem;
+            width: calc(100% - 260px);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 991.98px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                min-height: auto;
+                padding: 1.5rem 1rem !important;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 2rem 1.25rem;
+            }
+        }
+
+        /* Premium Stat Cards */
+        .stat-card {
+            background: white;
+            border: 1px solid var(--lf-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: var(--lf-card-shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 35px rgba(15, 23, 42, 0.06);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        /* Modern Data Grid Container */
+        .student-card {
+            border: 1px solid var(--lf-border);
+            border-radius: 24px;
+            box-shadow: var(--lf-card-shadow);
+            overflow: hidden;
+            background: white;
+            margin-top: 2rem;
+        }
+
+        .card-header {
+            background: #ffffff !important;
+            padding: 1.5rem 1.75rem;
+            border-bottom: 1px solid var(--lf-border);
+        }
+
+        /* Advanced Data Table Styling */
+        .table-responsive {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 1.2rem 1.5rem;
+            background-color: #f8fafc !important;
+            color: #64748b !important;
+            border-bottom: 1px solid var(--lf-border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table tbody tr {
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .table tbody td {
+            padding: 1.2rem 1.5rem;
+            font-size: 0.94rem;
+            color: #334155;
+            border-bottom: 1px solid #f1f5f9;
+            background-color: transparent;
+        }
+        
+        /* Smooth Row Hover & Left Indicator Lift Effect */
+        .table tbody tr:hover td {
+            background-color: #f8fafc !important;
+        }
+
+        .table tbody tr::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: var(--lf-primary);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .table tbody tr:hover ::after {
+            opacity: 1;
+        }
+
+        /* Search Input Styling */
+        .search-wrapper {
+            position: relative;
+            max-width: 380px;
+            width: 100%;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .search-wrapper input {
+            padding-left: 2.75rem;
+            border-radius: 14px;
+            border: 1px solid var(--lf-border);
+            font-size: 0.9rem;
+            padding-top: 0.7rem;
+            padding-bottom: 0.7rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-wrapper input:focus {
+            border-color: var(--lf-primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+        }
+
+        /* Button Custom Action Styling */
+        .btn-action-group .btn {
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 0.55rem 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-action-group .btn:hover {
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+
+        <div class="sidebar col-md-2 p-3 d-flex flex-column">
+            <div class="sidebar-brand text-center d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-mortarboard-fill text-primary fs-4"></i> Learnify Admin
+            </div>
+
+            <div class="flex-grow-1">
+                <a th:href="@{/admin/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                <a th:href="@{/admin/students}" class="active"><i class="bi bi-people-fill"></i> Students</a>
+                <a th:href="@{/admin/courses}"><i class="bi bi-book-fill"></i> Courses</a>
+                <a th:href="@{/admin/payments}"><i class="bi bi-credit-card-fill"></i> Payments</a>
+                <a th:href="@{/admin/attendance}"><i class="bi bi-calendar-check-fill"></i> Attendance</a>
+                <a th:href="@{/admin/results}"><i class="bi bi-file-earmark-text-fill"></i> Results</a>
+                <a th:href="@{/admin/certificates}"><i class="bi bi-award-fill"></i> Certificates</a>
+            </div>
+
+            <div class="pt-3 border-top border-secondary border-opacity-25">
+                <a th:href="@{/logout}" class="text-danger fw-bold">
+                    <i class="bi bi-power"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <div class="main-content col-md-10">
+            
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+                <div>
+                    <h2 class="fw-bold m-0 tracking-tight text-dark">Student Management</h2>
+                    <p class="text-muted small m-0 mt-1">Manage registered students, monitor learner activity, generate certificates and manage accounts.</p>
+                </div>
+                <a th:href="@{/admin/dashboard}" class="btn btn-white border bg-white px-4 py-2.5 fw-semibold shadow-sm rounded-3 text-dark">
+                    <i class="bi bi-columns-gap me-2 small text-primary"></i> Dashboard
+                </a>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card d-flex align-items-center gap-3">
+                        <div class="stat-icon text-primary bg-primary bg-opacity-10">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted small mb-0 fw-medium">Total Students</p>
+                            <h4 class="fw-extrabold mb-0 mt-1 text-dark" th:text="${#lists.size(students)}">0</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card d-flex align-items-center gap-3">
+                        <div class="stat-icon text-success bg-success bg-opacity-10">
+                            <i class="bi bi-award-fill"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted small mb-0 fw-medium">Certificates</p>
+                            <h4 class="fw-extrabold mb-0 mt-1 text-dark">Generated</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card d-flex align-items-center gap-3">
+                        <div class="stat-icon text-warning bg-warning bg-opacity-10">
+                            <i class="bi bi-book-fill"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted small mb-0 fw-medium">Courses</p>
+                            <h4 class="fw-extrabold mb-0 mt-1 text-dark">Available</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card d-flex align-items-center gap-3">
+                        <div class="stat-icon text-info bg-info bg-opacity-10">
+                            <i class="bi bi-person-check-fill"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted small mb-0 fw-medium">Status</p>
+                            <h4 class="fw-extrabold mb-0 mt-1 text-dark">Active</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card student-card">
+                <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                    <h5 class="mb-0 fw-bold d-flex align-items-center gap-2 text-dark">
+                        <i class="bi bi-people text-primary"></i> Registered Students
+                    </h5>
+                    
+                    <div class="search-wrapper">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="directorySearch" class="form-control" placeholder="Search students by name or email...">
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th style="width: 100px;">ID</th>
+                                    <th>Student Name</th>
+                                    <th>Email Address</th>
+                                    <th class="text-end" style="width: 260px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentRecordsBody">
+                                <tr id="emptyStateRow" th:if="${students == null or #lists.isEmpty(students)}">
+                                    <td colspan="4" class="text-center text-muted py-5 my-4">
+                                        <div class="py-4">
+                                            <i class="bi bi-person-x text-muted opacity-40 mb-3 d-block" style="font-size: 4rem;"></i>
+                                            <h5 class="fw-bold text-dark mb-1">No students found.</h5>
+                                            <p class="text-muted small mb-0">Students will appear here after registration.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr th:each="student : ${students}" class="student-record-row">
+                                    <td class="fw-bold text-secondary" th:text="${student.id}">1</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2.5">
+                                            <div class="avatar-placeholder rounded-circle bg-light d-flex align-items-center justify-content-center text-primary fw-bold border" style="width: 32px; height: 32px; font-size: 0.85rem;" th:text="${#strings.substring(student.name,0,1)}">S</div>
+                                            <span class="fw-bold text-dark student-name-text" th:text="${student.name}">Student Name</span>
+                                        </div>
+                                    </td>
+                                    <td class="font-monospace text-secondary student-email-text" th:text="${student.email}">student@gmail.com</td>
+                                    <td class="text-end">
+                                        <div class="btn-group btn-action-group gap-2">
+                                            <a th:href="@{/admin/generate-certificate/{id}(id=${student.id})}"
+                                               class="btn btn-sm btn-outline-success">
+                                                <i class="bi bi-award-fill"></i> Certificate
+                                            </a>
+                                            <form th:action="@{/admin/delete-student/{id}(id=${student.id})}" method="post" class="d-inline" onsubmit="return confirm('Confirm deletion?')">
+<button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash-fill"></i> Delete
+                                            </button>
+</form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Live Search Filter Module Functionality
+    document.getElementById("directorySearch").addEventListener("keyup", function() {
+        const query = this.value.toLowerCase().trim();
+        const rows = document.querySelectorAll(".student-record-row");
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const name = row.querySelector(".student-name-text").innerText.toLowerCase();
+            const email = row.querySelector(".student-email-text").innerText.toLowerCase();
+
+            if (name.includes(query) || email.includes(query)) {
+                row.style.display = "";
+                visibleCount++;
+            } else {
+                row.style.display = "none";
+            }
+        });
+
+        // Toggle custom client search empty state placeholder explicitly dynamically
+        let staticEmptyRow = document.getElementById("emptyStateRow");
+        if (visibleCount === 0 && rows.length > 0) {
+            if (!staticEmptyRow) {
+                const tbody = document.getElementById("studentRecordsBody");
+                const tr = document.createElement("tr");
+                tr.id = "searchEmptyRow";
+                tr.innerHTML = `
+                    <td colspan="4" class="text-center text-muted py-5">
+                        <i class="bi bi-search text-muted opacity-50 d-block mb-2 fs-2"></i>
+                        <span class="small fw-medium">No records match your current criteria...</span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
+        } else {
+            const searchEmpty = document.getElementById("searchEmptyRow");
+            if (searchEmpty) searchEmpty.remove();
+        }
+    });
+
+    // Elegant Fade-In Smooth Micro-interactions & Animations Layout Sequence Loader
+    window.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".stat-card").forEach((card, i) => {
+            card.style.opacity = "0";
+            card.style.transform = "translateY(15px)";
+            setTimeout(() => {
+                card.style.transition = "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)";
+                card.style.opacity = "1";
+                card.style.transform = "translateY(0)";
+            }, i * 80);
+        });
+    });
+</script>
+
+</body>
+</html>
